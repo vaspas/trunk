@@ -4,9 +4,9 @@ import java.lang.annotation.*;
 
 @Target(value=ElementType.TYPE)
 @Retention(value= RetentionPolicy.RUNTIME)
-@Repeatable(ListenerMessageTypes.class)
-public @interface ListenerMessageType {
-	Class<?> ListenerType(); 
-Class<?> MessageType(); 
+@Repeatable(RegisterMessages.class)
+public @interface RegisterMessage {
+	Class<?> Listener(); 
+Class<?> Message(); 
 }
 

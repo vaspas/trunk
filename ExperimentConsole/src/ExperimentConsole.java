@@ -13,17 +13,16 @@ public class ExperimentConsole {
 			
 			ConcreteListener l=new ConcreteListener();
 			AsyncConcreteListener al=new AsyncConcreteListener(); 
-			
-			//System.out.println(l.getClass()==ConcreteListener.class);
-			
+						
 			MessagesDispatcher md=new MessagesDispatcher();
+			md.setSyncUiContext(new TestSynchonizationContext());
 			
 			md.Connect(l);
 			md.Connect(al);
 						
-			md.Distribute(new ConcreteMessage());
-			md.Distribute(new ConcreteMessage2());
-			md.Distribute(new ConcreteMessage3());
+			md.Distribute(new ConcreteMessage(),new Object());
+			md.Distribute(new ConcreteMessage2(),new Object());
+			md.Distribute(new ConcreteMessage3(),new Object());
 			
 			Thread.sleep(5000);
 			
