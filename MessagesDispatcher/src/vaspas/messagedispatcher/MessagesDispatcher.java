@@ -250,78 +250,71 @@ public class MessagesDispatcher {
 			mq.Queue.add(mqi);
 		}
 
-		final MessagesQueue messagesQueue=mq;
-		
+		final MessagesQueue messagesQueue = mq;
+
 		if (startNewThread)
-			_threadPool
-					.execute(() -> {
-						while (true) {
-							MessageQueueItem m;
-							boolean isLast = false;
-							synchronized (messagesQueue) {
-								m = messagesQueue.Queue.poll();
-								isLast = messagesQueue.Queue.peek() == null;
-								if(isLast)
-									messagesQueue.Queue.add(m);
-							}
+			_threadPool.execute(() -> QueueThreadFunc(messagesQueue));
+	}
 
-							//send queue message
-							for (Iterator<QueueMessageListener> i = GetListenersFor(
-									QueueMessageListener.class, message); i
-									.hasNext();) {
-								QueueMessageListener l = i.next();
-								if (m.ExcludeSender
-										&& l == m.Observer.getSender())
-									continue;
-								l.QueueListen(m.Message, m.Observer);
-							}
+	private void QueueThreadFunc(MessagesQueue messagesQueue) {
+		while (true) {
+			MessageQueueItem m;
+			boolean isLast = false;
+			synchronized (messagesQueue) {
+				m = messagesQueue.Queue.poll();
+				isLast = messagesQueue.Queue.peek() == null;
+				if (isLast)
+					messagesQueue.Queue.add(m);
+			}
 
-							// send queue UI message
-							for (Iterator<QueueUiMessageListener> i = GetListenersFor(
-									QueueUiMessageListener.class, message); i
-									.hasNext();) {
-								QueueUiMessageListener l = i.next();
-								if (m.ExcludeSender
-										&& l == m.Observer.getSender())
-									continue;
-								_syncUiContext.Send(() -> l.QueueUiListen(
-										m.Message, m.Observer));
-							}
+			// send queue message
+			for (Iterator<QueueMessageListener> i = GetListenersFor(
+					QueueMessageListener.class, m.Message); i.hasNext();) {
+				QueueMessageListener l = i.next();
+				if (m.ExcludeSender && l == m.Observer.getSender())
+					continue;
+				l.QueueListen(m.Message, m.Observer);
+			}
 
-							if (isLast) {
-								// send last queue message
-								for (Iterator<QueueLastMessageListener> i = GetListenersFor(
-										QueueLastMessageListener.class, message); i
-										.hasNext();) {
-									QueueLastMessageListener l = i.next();
-									if (m.ExcludeSender
-											&& l == m.Observer.getSender())
-										continue;
-									l.QueueLastListen(m.Message, m.Observer);
-								}
-								// send last queue UI message
-								for (Iterator<QueueUiLastMessageListener> i = GetListenersFor(
-										QueueUiLastMessageListener.class,
-										message); i.hasNext();) {
-									QueueUiLastMessageListener l = i.next();
-									if (m.ExcludeSender
-											&& l == m.Observer.getSender())
-										continue;
-									_syncUiContext.Send(() -> l
-											.QueueUiLastListen(m.Message,
-													m.Observer));
-								}
-							}
+			// send queue UI message
+			for (Iterator<QueueUiMessageListener> i = GetListenersFor(
+					QueueUiMessageListener.class, m.Message); i.hasNext();) {
+				QueueUiMessageListener l = i.next();
+				if (m.ExcludeSender && l == m.Observer.getSender())
+					continue;
+				_syncUiContext.Send(() -> l
+						.QueueUiListen(m.Message, m.Observer));
+			}
 
-							synchronized (messagesQueue) {	
-								if(isLast)
-									messagesQueue.Queue.remove(m);
-								m.OnComplete.run();
-								if (messagesQueue.Queue.peek() == null)
-									return;
-							}
-						}
-					});
+			if (isLast) {
+				// send last queue message
+				for (Iterator<QueueLastMessageListener> i = GetListenersFor(
+						QueueLastMessageListener.class, m.Message); i.hasNext();) {
+					QueueLastMessageListener l = i.next();
+					if (m.ExcludeSender && l == m.Observer.getSender())
+						continue;
+					l.QueueLastListen(m.Message, m.Observer);
+				}
+				// send last queue UI message
+				for (Iterator<QueueUiLastMessageListener> i = GetListenersFor(
+						QueueUiLastMessageListener.class, m.Message); i
+						.hasNext();) {
+					QueueUiLastMessageListener l = i.next();
+					if (m.ExcludeSender && l == m.Observer.getSender())
+						continue;
+					_syncUiContext.Send(() -> l.QueueUiLastListen(m.Message,
+							m.Observer));
+				}
+			}
+
+			synchronized (messagesQueue) {
+				if (isLast)
+					messagesQueue.Queue.remove(m);
+				m.OnComplete.run();
+				if (messagesQueue.Queue.peek() == null)
+					return;
+			}
+		}
 	}
 
 }
