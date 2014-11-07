@@ -2,7 +2,7 @@ package vaspas.sigflow.dataflow;
 
 public interface SignalWriterDecorator extends SignalWriter{
 
-	void setInternalSignalReader(SignalWriter reader);
+	void setInternalSignalWriter(SignalWriter writer);
 	SignalWriter getInternalSignalWriter();
 	
 }
