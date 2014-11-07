@@ -16,7 +16,7 @@ public class GenerateArrayIntModule implements ExecuteModule {
 		for(int i=0;i<DataLength;i++)
 		{
 			data[i]=i;
-		}
+		}	
 		
 		Out.Write(data, DataLength);
 		

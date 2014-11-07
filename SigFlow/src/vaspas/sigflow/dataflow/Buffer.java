@@ -2,7 +2,7 @@ package vaspas.sigflow.dataflow;
 
 import java.util.LinkedList;
 
-public abstract class Buffer implements Channel  {
+public abstract class Buffer implements Channel {
 	
 	private final LinkedList<BufferItem> _buffers = new LinkedList<BufferItem>();
     
